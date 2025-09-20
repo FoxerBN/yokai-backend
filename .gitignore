@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.env
+*.venv
+env/
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+*.egg
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Node
+node_modules/
+
+# IDEs
+.idea/
+*.swp
+
+# System files
+Thumbs.db
+
+# Test output
+htmlcov/
+coverage.xml
+*.cover
+
+# Misc
+*.bak
+*.tmp
