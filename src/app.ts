@@ -13,6 +13,9 @@ import { MessageResponse } from './interfaces/MessageResponse';
 import { connectDB } from './config/db';
 import mongoSanitize from 'express-mongo-sanitize';
 
+//Routes
+import articleRouter from './controllers/articleController';
+
 connectDB();
 mongoSanitize()
 const app = express();
@@ -30,6 +33,9 @@ app.get<{}, MessageResponse>('/', (req, res) => {
     message: 'Hi there!',
   });
 });
+
+// Article routes
+app.use('/api', articleRouter);
 
 // Global Middlewares
 app.use(notFound);
