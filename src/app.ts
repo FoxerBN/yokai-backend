@@ -3,6 +3,7 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
 dotenv.config();
 
 import { validateBody } from './middlewares/global/validateBody';
@@ -16,6 +17,7 @@ import mongoSanitize from 'express-mongo-sanitize';
 //Routes
 import articleRouter from './routes/articleRoute';
 import updateRouter from './routes/updateArticleRoute';
+import authRouter from './routes/authRoute';
 
 connectDB();
 mongoSanitize()
@@ -24,7 +26,7 @@ const app = express();
 app.use(morgan('dev'));
 app.use(helmet());
 app.use(cors());
-
+app.use(cookieParser());
 // Our custom body validation middleware
 app.use(express.json(), validateBody);
 
@@ -38,6 +40,7 @@ app.get<{}, MessageResponse>('/', (req, res) => {
 // Article routes
 app.use('/api', articleRouter);
 app.use('/api', updateRouter);
+app.use('/api', authRouter);
 
 // Global Middlewares
 app.use(notFound);
