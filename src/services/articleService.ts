@@ -114,20 +114,6 @@ export async function getArticleBySlug(slug: string): Promise<IArticle | null> {
   }
 }
 
-/**
- * Increment article views
- */
-export async function incrementArticleViews(slug: string): Promise<void> {
-  try {
-    await Article.findOneAndUpdate(
-      { slug },
-      { $inc: { views: 1 } }
-    );
-  } catch (error) {
-    console.error('Error incrementing article views:', error);
-    throw new Error('Failed to update article views');
-  }
-}
 
 /**
  * Get article count for pagination
@@ -152,30 +138,27 @@ export async function getArticleCount(categorySlug?: string): Promise<number> {
   }
 }
 
+
 /**
- * Search articles by title or content
+ * Quick search for dropdown/autocomplete (returns only id, title, slug)
  */
-export async function searchArticles(searchTerm: string, page = 1, limit = 10): Promise<IArticle[]> {
+export async function quickSearchArticles(searchTerm: string, limit = 8): Promise<Partial<IArticle>[]> {
   try {
-    const skip = (page - 1) * limit;
-    
     const articles = await Article.find({
       publishedAt: { $exists: true },
       $or: [
         { title: { $regex: searchTerm, $options: 'i' } },
-        { content: { $regex: searchTerm, $options: 'i' } },
-        { excerpt: { $regex: searchTerm, $options: 'i' } }
+        { excerpt: { $regex: searchTerm, $options: 'i' } },
+        { content: { $regex: searchTerm, $options: 'i' } }
       ]
     })
-      .populate('category', 'name slug description')
-      .sort({ publishedAt: -1 })
-      .skip(skip)
+      .select('_id title slug')
       .limit(limit)
       .lean();
     
     return articles;
   } catch (error) {
-    console.error('Error searching articles:', error);
-    throw new Error('Failed to search articles');
+    console.error('Error in quick search:', error);
+    throw new Error('Quick search failed');
   }
 }

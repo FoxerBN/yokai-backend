@@ -14,7 +14,8 @@ import { connectDB } from './config/db';
 import mongoSanitize from 'express-mongo-sanitize';
 
 //Routes
-import articleRouter from './controllers/articleController';
+import articleRouter from './routes/articleRoute';
+import updateRouter from './routes/updateArticleRoute';
 
 connectDB();
 mongoSanitize()
@@ -36,6 +37,7 @@ app.get<{}, MessageResponse>('/', (req, res) => {
 
 // Article routes
 app.use('/api', articleRouter);
+app.use('/api', updateRouter);
 
 // Global Middlewares
 app.use(notFound);
