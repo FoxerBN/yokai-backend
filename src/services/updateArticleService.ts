@@ -1,27 +1,112 @@
-import { Article } from '../models/DatabaseModels';
+import { Article,Like,Category } from '../models/DatabaseModels';
+import { IArticle } from '../interfaces/database/IArticle';
+import type { CreateArticleRequest } from '../interfaces/CreateArticleRequest';
+
+
 
 /**
- * Like article by slug
+ * Create new article
  */
-export async function likeArticle(slug: string): Promise<{ likes: number } | null> {
+export async function createArticle(articleData: CreateArticleRequest): Promise<IArticle> {
   try {
-    const article = await Article.findOneAndUpdate(
-      { slug },
-      { $inc: { likes: 1 } },
-      { new: true }
-    );
-    
-    if (!article) {
-      return null;
+    // Find category by slug
+    const category = await Category.findOne({ slug: articleData.category });
+    if (!category) {
+      throw new Error('Category not found');
     }
+
+    // Check if slug already exists
+    const existingArticle = await Article.findOne({ slug: articleData.slug });
+    if (existingArticle) {
+      throw new Error('Article with this slug already exists');
+    }
+
+    const newArticle = new Article({
+      title: articleData.title,
+      slug: articleData.slug,
+      content: articleData.content,
+      excerpt: articleData.excerpt,
+      author: 'foxerBN', // Default author
+      category: category._id,
+      isPublished: true,
+      publishedAt: new Date(),
+      views: 0,
+      likes: 0
+    });
+
+    await newArticle.save();
     
-    return { likes: article.likes };
+    // Return with populated category
+    const populatedArticle = await Article.findById(newArticle._id)
+      .populate('category', 'name slug description')
+      .lean();
+
+    return populatedArticle as IArticle;
   } catch (error) {
-    console.error('Error liking article:', error);
-    throw new Error('Failed to like article');
+    console.error('Error creating article:', error);
+    throw error;
   }
 }
 
+
+
+/**
+ * Toggle like - add if not liked, remove if already liked
+ */
+export async function toggleLike(slug: string, ipAddress: string): Promise<{ likes: number; liked: boolean } | null> {
+  try {
+    const article = await Article.findOne({ slug });
+    if (!article) return null;
+
+    const existingLike = await Like.findOne({ 
+      article: article._id, 
+      ipAddress 
+    });
+
+    if (existingLike) {
+      // Remove like
+      await Like.deleteOne({ _id: existingLike._id });
+      const updatedArticle = await Article.findByIdAndUpdate(
+        article._id,
+        { $inc: { likes: -1 } },
+        { new: true }
+      );
+      return { likes: updatedArticle!.likes, liked: false };
+    } else {
+      // Add like
+      await new Like({ article: article._id, ipAddress }).save();
+      const updatedArticle = await Article.findByIdAndUpdate(
+        article._id,
+        { $inc: { likes: 1 } },
+        { new: true }
+      );
+      return { likes: updatedArticle!.likes, liked: true };
+    }
+  } catch (error) {
+    console.error('Error toggling like:', error);
+    throw new Error('Failed to toggle like');
+  }
+}
+
+/**
+ * Check if user liked article
+ */
+export async function hasUserLikedArticle(slug: string, ipAddress: string): Promise<boolean> {
+  try {
+    const article = await Article.findOne({ slug });
+    if (!article) return false;
+
+    const like = await Like.findOne({ 
+      article: article._id, 
+      ipAddress 
+    });
+    
+    return !!like;
+  } catch (error) {
+    console.error('Error checking like status:', error);
+    return false;
+  }
+}
 
 /**
  * Increment article views

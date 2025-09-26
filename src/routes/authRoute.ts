@@ -52,14 +52,14 @@ authRouter.get<{}, MessageResponse | { isAdmin: boolean }>('/auth/check', (req: 
     const token = req.cookies?.adminToken;
     
     if (!token) {
-      return res.json({ isAdmin: false });
+      return res.status(401).json({ isAdmin: false });
     }
 
     const decoded = verifyToken(token);
     
     if (!decoded || decoded.role !== 'admin') {
       res.clearCookie('adminToken'); // Clear invalid token
-      return res.json({ isAdmin: false });
+      return res.status(401).json({ isAdmin: false });
     }
 
     res.json({ isAdmin: true });

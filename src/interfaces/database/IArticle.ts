@@ -8,7 +8,6 @@ export interface IArticle extends Document {
   excerpt?: string
   author: string
   category: Types.ObjectId
-  isPublished: boolean
   publishedAt?: Date
   views: number
   likes: number

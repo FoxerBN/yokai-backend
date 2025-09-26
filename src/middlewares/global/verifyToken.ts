@@ -1,28 +1,24 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../../services/authService';
-import { AuthRequest } from '../../interfaces/AuthRequest';
 
 /**
  * Middleware to verify admin authentication
  */
-export function requireAdmin(req: AuthRequest, res: Response, next: NextFunction) {
+export function requireAdmin(req: Request, res: Response, next: NextFunction) {
   try {
-    // Try to get token from cookie first, then from Authorization header
-    const cookieToken = req.cookies.adminToken;
-    
-    const token = cookieToken;
+    const cookieToken = req.cookies?.adminToken;
 
-    if (!token) {
+    if (!cookieToken) {
       return res.status(401).json({ message: 'Access denied. Admin token required.' });
     }
 
-    const decoded = verifyToken(token);
+    const decoded = verifyToken(cookieToken);
     
     if (!decoded || decoded.role !== 'admin') {
       return res.status(401).json({ message: 'Invalid or expired token' });
     }
 
-    req.isAdmin = true;
+    (req as any).isAdmin = true;
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
