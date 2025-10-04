@@ -13,7 +13,16 @@ const updateRouter = express.Router();
 //* Create new article (protected)
 updateRouter.post('/articles/create-article', requireAdmin, async (req: any, res: any) => {
   try {
-    const { title, slug, content, excerpt, category }: CreateArticleRequest = req.body;
+    const { 
+      title, 
+      slug, 
+      content, 
+      excerpt, 
+      category,
+      imageUrl,
+      sources,
+      readingTime
+    }: CreateArticleRequest = req.body;
 
     if (!title || !slug || !content || !category) {
       return res.status(400).json({ 
@@ -26,7 +35,10 @@ updateRouter.post('/articles/create-article', requireAdmin, async (req: any, res
       slug,
       content,
       excerpt: excerpt || '',
-      category
+      category,
+      imageUrl,
+      sources,
+      readingTime 
     });
 
     res.status(201).json(newArticle);

@@ -3,5 +3,8 @@ export interface CreateArticleRequest {
   slug: string;
   content: string;
   excerpt: string;
-  category: string; // category slug or ObjectId
+  category: string;
+  imageUrl?: string;
+  sources?: string[];
+  readingTime?: number;
 }

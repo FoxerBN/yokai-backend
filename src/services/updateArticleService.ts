@@ -21,13 +21,19 @@ export async function createArticle(articleData: CreateArticleRequest): Promise<
       throw new Error('Article with this slug already exists');
     }
 
+    // Calculate reading time if not provided
+    const readingTime = articleData.readingTime || calculateReadingTime(articleData.content);
+
     const newArticle = new Article({
       title: articleData.title,
       slug: articleData.slug,
       content: articleData.content,
       excerpt: articleData.excerpt,
-      author: 'foxerBN', // Default author
+      author: 'foxerBN',
       category: category._id,
+      imageUrl: articleData.imageUrl || '',        // PRIDAJ
+      sources: articleData.sources || [],          // PRIDAJ
+      readingTime: readingTime,                    // PRIDAJ
       isPublished: true,
       publishedAt: new Date(),
       views: 0,
@@ -46,6 +52,13 @@ export async function createArticle(articleData: CreateArticleRequest): Promise<
     console.error('Error creating article:', error);
     throw error;
   }
+}
+
+// Helper funkcia na výpočet reading time (ak ho chceš počítať na backende)
+function calculateReadingTime(content: string): number {
+  const wordsPerMinute = 200;
+  const wordCount = content.trim().split(/\s+/).length;
+  return Math.ceil(wordCount / wordsPerMinute);
 }
 
 

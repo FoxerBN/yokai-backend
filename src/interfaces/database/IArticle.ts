@@ -11,6 +11,9 @@ export interface IArticle extends Document {
   publishedAt?: Date
   views: number
   likes: number
+  imageUrl?: string        // PRIDAJ
+  sources?: string[]       // PRIDAJ
+  readingTime?: number     // PRIDAJ
   createdAt: Date
   updatedAt: Date
 }

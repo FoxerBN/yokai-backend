@@ -35,6 +35,18 @@ export const ArticleSchema = new Schema<IArticle>({
   likes: {
     type: Number,
     default: 0
+  },
+  imageUrl: {              // PRIDAJ
+    type: String,
+    default: ''
+  },
+  sources: {               // PRIDAJ
+    type: [String],
+    default: []
+  },
+  readingTime: {           // PRIDAJ
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true
