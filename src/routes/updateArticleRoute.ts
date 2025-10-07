@@ -58,6 +58,41 @@ updateRouter.post('/articles/create-article', requireAdmin, async (req: any, res
   }
 });
 
+updateRouter.put<{ slug: string }, MessageResponse>('/articles/:slug', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { slug } = req.params;
+    const updateData: Partial<CreateArticleRequest> = req.body;
+
+    const updatedArticle = await updateArticleService.updateArticle(slug, updateData);
+    if (!updatedArticle) {
+      return res.status(404).json({ message: 'Article not found' });
+    }
+
+    res.json({ message: 'Article updated successfully' });
+  } catch (error) {
+    console.error('Error in update article route:', error);
+    res.status(500).json({ message: 'Failed to update article' });
+  }
+});
+
+
+updateRouter.delete<{ slug: string }, MessageResponse>('/articles/:slug', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const { slug } = req.params;
+
+    const deleted = await updateArticleService.deleteArticle(slug);
+    if (!deleted) {
+      return res.status(404).json({ message: 'Article not found' });
+    }
+
+    res.json({ message: 'Article deleted successfully' });
+  } catch (error) {
+    console.error('Error in delete article route:', error);
+    res.status(500).json({ message: 'Failed to delete article' });
+  }
+});
+
+
 //* Increment article views (POST request)
 updateRouter.post<{ slug: string }, MessageResponse>('/articles/:slug/view', async (req: Request, res: Response) => {
   try {

@@ -31,9 +31,9 @@ export async function createArticle(articleData: CreateArticleRequest): Promise<
       excerpt: articleData.excerpt,
       author: 'foxerBN',
       category: category._id,
-      imageUrl: articleData.imageUrl || '',        // PRIDAJ
-      sources: articleData.sources || [],          // PRIDAJ
-      readingTime: readingTime,                    // PRIDAJ
+      imageUrl: articleData.imageUrl || '',
+      sources: articleData.sources || [],
+      readingTime: readingTime, 
       isPublished: true,
       publishedAt: new Date(),
       views: 0,
@@ -54,13 +54,54 @@ export async function createArticle(articleData: CreateArticleRequest): Promise<
   }
 }
 
+
+export async function updateArticle(slug: string, updateData: Partial<CreateArticleRequest>): Promise<IArticle | null> {
+  try {
+    const article = await Article.findOne({ slug });
+    if (!article) {
+      throw new Error('Article not found');
+    }
+
+    if (updateData.content && !updateData.readingTime) {
+      updateData.readingTime = calculateReadingTime(updateData.content);
+    }
+
+    const updatedArticle = await Article.findOneAndUpdate(
+      { slug },
+      { $set: updateData },
+      { new: true }
+    ).populate('category', 'name slug description').lean();
+
+    return updatedArticle as IArticle | null;
+  } catch (error) {
+    console.error('Error updating article:', error);
+    throw error;
+  }
+}
+
+export async function deleteArticle(slug: string): Promise<boolean> {
+  try {
+    const article = await Article.findOne({ slug });
+    if (!article) {
+      throw new Error('Article not found');
+    }
+
+    await Article.deleteOne({ _id: article._id });
+    await Like.deleteMany({ article: article._id });
+    
+    return true;
+  } catch (error) {
+    console.error('Error deleting article:', error);
+    throw error;
+  }
+}
+
 // Helper funkcia na výpočet reading time (ak ho chceš počítať na backende)
 function calculateReadingTime(content: string): number {
   const wordsPerMinute = 200;
   const wordCount = content.trim().split(/\s+/).length;
   return Math.ceil(wordCount / wordsPerMinute);
 }
-
 
 
 /**
