@@ -29,13 +29,14 @@ export async function getAllArticles(page = 1, limit = 10): Promise<IArticle[]> 
 export async function getArticlesByCategory(categorySlug: string, page = 1, limit = 10): Promise<IArticle[]> {
   try {
     const skip = (page - 1) * limit;
-    
-    // Find category first
+  
     const category = await Category.findOne({ slug: categorySlug });
+    
     if (!category) {
+      console.log('❌ Category not found with slug:', categorySlug);
       throw new Error('Category not found');
     }
-    
+  
     const articles = await Article.find({ 
       category: category._id,
       publishedAt: { $exists: true }
@@ -46,9 +47,11 @@ export async function getArticlesByCategory(categorySlug: string, page = 1, limi
       .limit(limit)
       .lean();
     
+    console.log(`✅ Returning ${articles.length} articles (page ${page}, limit ${limit})`);
+    
     return articles;
   } catch (error) {
-    console.error('Error fetching articles by category:', error);
+    console.error('❌ Error fetching articles by category:', error);
     throw error;
   }
 }
