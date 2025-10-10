@@ -10,7 +10,7 @@ env/
 venv/
 ENV/
 build/
-dist/
+# dist/ - commented out to include frontend build
 *.egg-info/
 *.egg
 
